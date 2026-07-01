@@ -1,4 +1,5 @@
 import os
+import json
 import asyncpg
 
 _pool: asyncpg.Pool | None = None
@@ -15,7 +16,7 @@ def get_pool() -> asyncpg.Pool:
 
 async def get_destinations(crawler_id: str) -> list[asyncpg.Record]:
     async with _pool.acquire() as conn:
-        return await conn.fetch(
+        rows = await conn.fetch(
             """
             SELECT d.id, d.type, d.config
             FROM destinations d
@@ -24,3 +25,4 @@ async def get_destinations(crawler_id: str) -> list[asyncpg.Record]:
             """,
             crawler_id,
         )
+        return [{"id": r["id"], "type": r["type"], "config": json.loads(r["config"])} for r in rows]
