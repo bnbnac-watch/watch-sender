@@ -1,10 +1,11 @@
 import asyncio
 import db
-from senders import slack, telegram, webhook
+from senders import slack, telegram, webhook, discord
 
 _SENDERS = {
     "slack": slack.send,
     "telegram": telegram.send,
+    "discord": discord.send,
 }
 
 
