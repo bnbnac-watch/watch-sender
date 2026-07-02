@@ -1,8 +1,11 @@
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from pydantic import BaseModel
 import db
 import router
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
 @asynccontextmanager

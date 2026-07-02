@@ -1,6 +1,9 @@
 import asyncio
+import logging
 import db
 from senders import slack, telegram, webhook, discord
+
+logger = logging.getLogger(__name__)
 
 _SENDERS = {
     "slack": slack.send,
@@ -28,8 +31,9 @@ async def _dispatch(dest: dict, message: str, payload: dict):
             sender = _SENDERS.get(dest["type"])
             if sender:
                 await sender(dest["config"], message)
+        logger.info("[%s] 발송 성공", dest["id"])
     except Exception as e:
-        print(f"[{dest['id']}] 발송 실패: {e}")
+        logger.error("[%s] 발송 실패: %s", dest["id"], e)
 
 
 async def route_notify(crawler_id: str, items: list[dict]):
