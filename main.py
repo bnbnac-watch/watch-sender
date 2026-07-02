@@ -22,6 +22,15 @@ class NotifyRequest(BaseModel):
     items: list[dict]
 
 
+class BatchEntry(BaseModel):
+    crawler_id: str
+    items: list[dict]
+
+
+class BatchNotifyRequest(BaseModel):
+    entries: list[BatchEntry]
+
+
 class ErrorRequest(BaseModel):
     crawler_id: str
     error: str
@@ -36,6 +45,12 @@ async def health():
 @app.post("/notify")
 async def notify(req: NotifyRequest):
     await router.route_notify(req.crawler_id, req.items)
+    return {"status": "ok"}
+
+
+@app.post("/notify/batch")
+async def notify_batch(req: BatchNotifyRequest):
+    await router.route_notify_batch([e.model_dump() for e in req.entries])
     return {"status": "ok"}
 
 
