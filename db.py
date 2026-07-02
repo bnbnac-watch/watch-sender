@@ -14,7 +14,7 @@ def get_pool() -> asyncpg.Pool:
     return _pool
 
 
-async def get_destinations(crawler_id: str) -> list[asyncpg.Record]:
+async def get_destinations(crawler_id: int) -> list[asyncpg.Record]:
     async with _pool.acquire() as conn:
         rows = await conn.fetch(
             """

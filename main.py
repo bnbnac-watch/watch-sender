@@ -18,12 +18,12 @@ app = FastAPI(lifespan=lifespan)
 
 
 class NotifyRequest(BaseModel):
-    crawler_id: str
+    crawler_id: int
     items: list[dict]
 
 
 class BatchEntry(BaseModel):
-    crawler_id: str
+    crawler_id: int
     items: list[dict]
 
 
@@ -32,7 +32,7 @@ class BatchNotifyRequest(BaseModel):
 
 
 class ErrorRequest(BaseModel):
-    crawler_id: str
+    crawler_id: int
     error: str
     fail_count: int
 
