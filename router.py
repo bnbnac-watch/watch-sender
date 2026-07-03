@@ -1,11 +1,20 @@
 import asyncio
 import logging
 from collections import defaultdict
+import httpx
 import db
 import formatters
 from senders import slack, telegram, discord
 
 logger = logging.getLogger(__name__)
+
+_http_client: httpx.AsyncClient | None = None
+
+
+def set_client(client: httpx.AsyncClient):
+    global _http_client
+    _http_client = client
+
 
 _SENDERS = {
     "slack": slack.send,
@@ -29,7 +38,7 @@ async def _dispatch(dest: dict, message: str):
         return
     try:
         for chunk in messages:
-            await sender(dest["config"], chunk)
+            await sender(dest["config"], chunk, _http_client)
         logger.info("[%s] 발송 성공 (%d 청크)", dest["id"], len(messages))
     except Exception as e:
         logger.error("[%s] 발송 실패: %s", dest["id"], e)

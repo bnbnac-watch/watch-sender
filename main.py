@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from pydantic import BaseModel
+import httpx
 import db
 import router
 
@@ -11,7 +12,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await db.init()
-    yield
+    async with httpx.AsyncClient(timeout=10) as client:
+        router.set_client(client)
+        yield
 
 
 app = FastAPI(lifespan=lifespan)
