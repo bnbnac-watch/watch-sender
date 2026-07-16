@@ -34,7 +34,7 @@
 
 ## 메시지 포맷 (`formatters.py`)
 
-- `format_items`: `[{crawler_id}] 새 글 {n}개` 헤더 + 아이템별 `제목 - url`(요약 있으면 제목 아래 요약 본문)
+- `format_items`: `[{crawler_id}] 새 글 {n}개` 헤더 + 아이템별 `제목` 다음 줄에 `url`(요약 있으면 제목 아래 요약 본문)
 - `format_error`: `[{crawler_id}] 크롤러 오류 ({fail_count}회 연속)` + 에러 메시지
 - `split_message`: 플랫폼별 글자 수 한도를 넘으면 줄바꿈 경계에서 잘라 여러 메시지로 분할 발송(문장 중간 절단 방지)
 

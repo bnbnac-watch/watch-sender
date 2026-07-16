@@ -4,7 +4,7 @@ def format_items(crawler_id: str, items: list[dict]) -> str:
         if item.get("summary"):
             lines.append(f"• {item['title']}\n{item['summary']}")
         else:
-            lines.append(f"• {item['title']} - {item['url']}")
+            lines.append(f"• {item['title']}\n{item['url']}")
     return "\n".join(lines)
 
 
