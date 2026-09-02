@@ -1,10 +1,10 @@
 def format_items(crawler_id: str, items: list[dict]) -> str:
     lines = [f"[{crawler_id}] 새 글 {len(items)}개"]
     for item in items:
-        if item.get("summary"):
-            lines.append(f"• {item['title']}\n{item['summary']}")
-        else:
-            lines.append(f"• {item['title']}\n{item['url']}")
+        body = item["summary"] if item.get("summary") else item["url"]
+        if item.get("image_grid_url"):
+            body = f"{body}\n{item['image_grid_url']}"
+        lines.append(f"• {item['title']}\n{body}")
     return "\n".join(lines)
 
 
