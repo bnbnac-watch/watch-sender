@@ -26,3 +26,13 @@ async def get_destinations(crawler_id: int) -> list[asyncpg.Record]:
             crawler_id,
         )
         return [{"id": r["id"], "type": r["type"], "config": json.loads(r["config"])} for r in rows]
+
+
+async def get_destination(destination_id: int) -> dict | None:
+    async with _pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT id, type, config FROM destinations WHERE id = $1", destination_id
+        )
+        if row is None:
+            return None
+        return {"id": row["id"], "type": row["type"], "config": json.loads(row["config"])}
