@@ -23,10 +23,18 @@
 ### POST /error
 
 ```json
-{"crawler_id": 1, "error": "...", "fail_count": 3}
+{"crawler_id": 1, "error": "...", "fail_count": 3, "disabled": false}
 ```
 
-크롤러 실패 알림. 해당 crawler의 destination 전체에 발송.
+크롤러 실패 알림. `disabled`(기본 false)가 true면 자동 비활성화됐다는 안내가 메시지에 붙는다. 소비자용 crawler destination이 아니라 `ALERT_DESTINATION_ID`로 지정한 운영자 전용 destination에만 발송한다. 호출 시점(몇 회째 실패에 보낼지)은 `watch-runner`가 결정한다.
+
+### POST /recovered
+
+```json
+{"crawler_id": 1, "previous_fail_count": 3}
+```
+
+오류 알림이 나갔던 크롤러가 다시 성공했을 때의 복구 알림. `/error`와 같은 운영자 전용 destination으로 발송.
 
 ### GET /health
 
@@ -55,6 +63,7 @@
 | 변수 | 설명 |
 |---|---|
 | `DATABASE_URL` | PostgreSQL 연결 문자열 (destinations/crawler_destinations 조회) |
+| `ALERT_DESTINATION_ID` | `/error`·`/recovered` 알림을 받을 운영자 전용 `destinations.id`. 미설정이거나 해당 id가 없으면 발송하지 않고 로그만 남긴다 — crawler destination으로 폴백하지 않는다(내부 오류 원문이 공용 채널에 나가는 것을 막기 위함) |
 
 ## 포트
 

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from collections import defaultdict
 import httpx
 import db
@@ -9,6 +10,10 @@ from senders import slack, telegram, discord
 logger = logging.getLogger(__name__)
 
 _http_client: httpx.AsyncClient | None = None
+
+# 운영 알림(오류·복구)은 소비자가 보는 크롤러 destination과 분리해 이 destination으로만 보낸다.
+# 미설정이면 발송하지 않는다 — 크롤러 destination으로 폴백하면 내부 오류 원문이 공용 채널에 나간다.
+ALERT_DESTINATION_ID = int(os.environ["ALERT_DESTINATION_ID"]) if os.getenv("ALERT_DESTINATION_ID") else None
 
 
 def set_client(client: httpx.AsyncClient):
@@ -72,7 +77,20 @@ async def route_notify_batch(entries: list[dict]):
     ])
 
 
-async def route_error(crawler_id: str, error: str, fail_count: int):
-    destinations = await db.get_destinations(crawler_id)
-    message = formatters.format_error(crawler_id, error, fail_count)
-    await asyncio.gather(*[_dispatch(dest, message) for dest in destinations])
+async def _dispatch_alert(message: str):
+    if ALERT_DESTINATION_ID is None:
+        logger.warning("ALERT_DESTINATION_ID 미설정, 운영 알림 발송 생략: %s", message.splitlines()[0])
+        return
+    dest = await db.get_destination(ALERT_DESTINATION_ID)
+    if dest is None:
+        logger.error("운영 알림 destination을 찾을 수 없음 (id=%s), 발송 생략", ALERT_DESTINATION_ID)
+        return
+    await _dispatch(dest, message)
+
+
+async def route_error(crawler_id: int, error: str, fail_count: int, disabled: bool = False):
+    await _dispatch_alert(formatters.format_error(crawler_id, error, fail_count, disabled))
+
+
+async def route_recovered(crawler_id: int, previous_fail_count: int):
+    await _dispatch_alert(formatters.format_recovery(crawler_id, previous_fail_count))

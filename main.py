@@ -38,6 +38,12 @@ class ErrorRequest(BaseModel):
     crawler_id: int
     error: str
     fail_count: int
+    disabled: bool = False
+
+
+class RecoveredRequest(BaseModel):
+    crawler_id: int
+    previous_fail_count: int
 
 
 @app.get("/health")
@@ -59,7 +65,13 @@ async def notify_batch(req: BatchNotifyRequest):
 
 @app.post("/error")
 async def error(req: ErrorRequest):
-    await router.route_error(req.crawler_id, req.error, req.fail_count)
+    await router.route_error(req.crawler_id, req.error, req.fail_count, req.disabled)
+    return {"status": "ok"}
+
+
+@app.post("/recovered")
+async def recovered(req: RecoveredRequest):
+    await router.route_recovered(req.crawler_id, req.previous_fail_count)
     return {"status": "ok"}
 
 
